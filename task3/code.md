@@ -20,7 +20,6 @@ For this example, venue and equipment are fixed costs. Catering, transport, and 
 
 ## Flowchart
 
-
 flowchart TD
     Start([Start])
     Inputs[/Input venue and equipment costs<br/>Input per-participant costs<br/>Input sponsorship, contribution, and registrations/]
@@ -34,7 +33,9 @@ flowchart TD
     Output[/Display costs, contributions,<br/>shortfall, and break-even count/]
     End([End])
 
-
+    Start --> Inputs --> Fixed --> Variable --> Total --> Shortfall --> Check
+    Check -- Yes --> BreakEven --> Output --> End
+    Check -- No --> Impossible --> Output
 
 ## Sample input
 
