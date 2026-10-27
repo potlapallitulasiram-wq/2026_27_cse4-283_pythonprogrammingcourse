@@ -1,59 +1,84 @@
-import math
 
-# Fixed event costs
-venue_cost = float(input("Venue cost: "))
-equipment_cost = float(input("Equipment cost: "))
+def analyze_orders(initial_inventory, orders):
+    inventory = initial_inventory
+    results = []
 
-# Costs for each participant
-catering_cost_per_participant = float(input("Catering cost per participant: "))
-transport_cost_per_participant = float(input("Transport cost per participant: "))
-certificate_cost_per_participant = float(input("Certificate cost per participant: "))
+    for order in orders:
+        order_id = order["id"]
+        ordered = order["ordered"]
+        dispatched = order["dispatched"]
+        returned = order["returned"]
 
-# Funding and attendance
-sponsorship = float(input("Sponsorship amount: "))
-contribution_per_participant = float(input("Contribution per participant: "))
-expected_registrations = int(input("Expected registrations: "))
+        issues = []
 
-fixed_costs = venue_cost + equipment_cost
+        if ordered < 0 or dispatched < 0 or returned < 0:
+            issues.append("quantities cannot be negative")
+        if dispatched > ordered:
+            issues.append("dispatched quantity exceeds ordered quantity")
+        if returned > dispatched:
+            issues.append("returned quantity exceeds dispatched quantity")
 
-variable_cost_per_participant = (
-    catering_cost_per_participant
-    + transport_cost_per_participant
-    + certificate_cost_per_participant
-)
+        if issues:
+            results.append({
+                "id": order_id,
+                "status": "INCONSISTENT",
+                "outstanding": None,
+                "issues": issues,
+                "inventory": inventory,
+            })
+            continue
 
-total_costs = fixed_costs + (
-    variable_cost_per_participant * expected_registrations
-)
+        outstanding = ordered - dispatched
+        inventory = inventory - dispatched + returned
 
-participant_contributions = (
-    contribution_per_participant * expected_registrations
-)
+        results.append({
+            "id": order_id,
+            "status": "OK",
+            "outstanding": outstanding,
+            "issues": [],
+            "inventory": inventory,
+        })
 
-total_funding = sponsorship + participant_contributions
-shortfall = max(0, total_costs - total_funding)
+    return results, inventory
 
-net_per_participant = (
-    contribution_per_participant - variable_cost_per_participant
-)
 
-print("\n--- Event Financial Summary ---")
-print(f"Fixed costs:                 {fixed_costs:.2f}")
-print(f"Variable cost per participant: {variable_cost_per_participant:.2f}")
-print(f"Total costs:                 {total_costs:.2f}")
-print(f"Participant contributions:   {participant_contributions:.2f}")
-print(f"Sponsorship:                 {sponsorship:.2f}")
-print(f"Funding shortfall:           {shortfall:.2f}")
+def main():
+    initial_inventory = int(input("Enter starting inventory: "))
+    count = int(input("Enter number of orders: "))
 
-if net_per_participant > 0:
-    amount_to_cover = max(0, fixed_costs - sponsorship)
-    break_even_registrations = math.ceil(
-        amount_to_cover / net_per_participant
-    )
-    print(f"Break-even registrations:    {break_even_registrations}")
-else:
-    print(
-        "Break-even registrations:    Not possible through registrations "
-        "alone; the contribution per participant must exceed the "
-        "variable cost per participant."
-    )
+    orders = []
+    for _ in range(count):
+        order_id = input("Order ID: ")
+        ordered = int(input("Ordered quantity: "))
+        dispatched = int(input("Dispatched quantity: "))
+        returned = int(input("Returned quantity: "))
+
+        orders.append({
+            "id": order_id,
+            "ordered": ordered,
+            "dispatched": dispatched,
+            "returned": returned,
+        })
+
+    results, final_inventory = analyze_orders(initial_inventory, orders)
+
+    print("\nOrder analysis")
+    for result in results:
+        if result["status"] == "OK":
+            print(
+                f'{result["id"]}: OK, '
+                f'outstanding={result["outstanding"]}, '
+                f'inventory={result["inventory"]}'
+            )
+        else:
+            print(
+                f'{result["id"]}: INCONSISTENT, '
+                f'issues={"; ".join(result["issues"])}, '
+                f'inventory unchanged at {result["inventory"]}'
+            )
+
+    print(f"\nFinal inventory: {final_inventory}")
+
+
+if __name__ == "__main__":
+    main()
