@@ -34,9 +34,6 @@ flowchart TD
     Output[/Display costs, contributions,<br/>shortfall, and break-even count/]
     End([End])
 
-    Start --> Inputs --> Fixed --> Variable --> Total --> Shortfall --> Check
-    Check -- Yes --> BreakEven --> Output --> End
-    Check -- No --> Impossible --> Output
 
 
 ## Sample input
