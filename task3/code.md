@@ -20,7 +20,6 @@ For this example, venue and equipment are fixed costs. Catering, transport, and 
 
 ## Flowchart
 
-```mermaid
 
 flowchart TD
     Start([Start])
@@ -38,7 +37,7 @@ flowchart TD
     Start --> Inputs --> Fixed --> Variable --> Total --> Shortfall --> Check
     Check -- Yes --> BreakEven --> Output --> End
     Check -- No --> Impossible --> Output
-```
+
 
 ## Sample input
 
