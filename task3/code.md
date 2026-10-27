@@ -1,82 +1,87 @@
+# Retail Order Dispatch and Return Analysis
+
 ## Problem statement
 
-Create a Python program to plan the finances for a campus event. It calculates total event costs for the venue, equipment, catering, transport, and certificates; the contribution collected from participants; any sponsorship shortfall; and the minimum number of registrations required to break even.
+Process each order’s ordered, dispatched, and returned quantities. Calculate the outstanding quantity, update inventory for valid dispatches and returns, and flag records that are inconsistent.
 
-For this example, venue and equipment are fixed costs. Catering, transport, and certificates are costs per participant. Sponsorship is treated as a fixed amount.
+Assume:
+
+- Dispatching an item reduces inventory.
+- Returning an item increases inventory.
+- Returned quantity cannot exceed dispatched quantity.
+- Dispatched quantity cannot exceed ordered quantity.
+- Quantities must be non-negative.
+- An inconsistent record does not change inventory.
 
 ## Algorithm
 
-1. Read the venue and equipment costs.
-2. Read the catering, transport, and certificate costs per participant.
-3. Read the sponsorship amount, contribution per participant, and expected registrations.
-4. Calculate fixed costs: venue + equipment.
-5. Calculate variable cost per participant: catering + transport + certificates.
-6. Calculate total event costs for the expected registrations.
-7. Calculate participant contributions and the amount still unfunded after sponsorship and participant contributions.
-8. Calculate the net amount available per participant: contribution per participant − variable cost per participant.
-9. If the net amount is positive, calculate the break-even registration count as the ceiling of:
-   `(fixed costs − sponsorship) ÷ net amount per participant`.
-10. If the net amount is zero or negative, report that break-even cannot be reached through registrations alone.
+1. Read the starting inventory and each order’s ID, ordered quantity, dispatched quantity, and returned quantity.
+2. Check that quantities are non-negative, dispatched quantity does not exceed ordered quantity, and returned quantity does not exceed dispatched quantity.
+3. For a valid record:
+   - Calculate outstanding quantity as `ordered - dispatched`.
+   - Update inventory as `inventory - dispatched + returned`.
+4. For an invalid record, report the issue and leave inventory unchanged.
+5. Display each order’s status and the final inventory.
 
 ## Flowchart
 
 flowchart TD
-    Start([Start])
-    Inputs[/Input venue and equipment costs<br/>Input per-participant costs<br/>Input sponsorship, contribution, and registrations/]
-    Fixed[Calculate fixed costs<br/>venue + equipment]
-    Variable[Calculate variable cost per participant<br/>catering + transport + certificates]
-    Total[Calculate total costs and participant contributions]
-    Shortfall[Calculate funding shortfall<br/>max(0, total costs - sponsorship - contributions)]
-    Check{Is contribution per participant<br/>greater than variable cost per participant?}
-    BreakEven[Calculate break-even registrations<br/>ceil(max(0, fixed costs - sponsorship)<br/>/ net per participant)]
-    Impossible[Report break-even cannot be reached<br/>through registrations alone]
-    Output[/Display costs, contributions,<br/>shortfall, and break-even count/]
-    End([End])
+    A([Start]) --> B[Read starting inventory and order records]
+    B --> C{More records?}
+    C -- No --> H[Display final inventory]
+    H --> I([End])
+    C -- Yes --> D[Read ordered, dispatched, and returned quantities]
+    D --> E{Quantities valid?}
+    E -- No --> F[Flag inconsistent record; do not update inventory]
+    E -- Yes --> G[Calculate outstanding and update inventory]
+    F --> C
+    G --> C
 
-   
+
 ## Sample input
 
 ```text
-Venue cost: 5000
-Equipment cost: 2000
-Catering cost per participant: 300
-Transport cost per participant: 100
-Certificate cost per participant: 50
-Sponsorship amount: 3000
-Contribution per participant: 600
-Expected registrations: 30
+Enter starting inventory: 100
+Enter number of orders: 3
+Order ID: ORD101
+Ordered quantity: 10
+Dispatched quantity: 8
+Returned quantity: 1
+Order ID: ORD102
+Ordered quantity: 5
+Dispatched quantity: 6
+Returned quantity: 0
+Order ID: ORD103
+Ordered quantity: 7
+Dispatched quantity: 4
+Returned quantity: 2
 ```
 
 ## Sample output
 
 ```text
---- Event Financial Summary ---
-Fixed costs:                 7000.00
-Variable cost per participant: 450.00
-Total costs:                 20500.00
-Participant contributions:   18000.00
-Sponsorship:                 3000.00
-Funding shortfall:           0.00
-Break-even registrations:    23
+Order analysis
+ORD101: OK, outstanding=2, inventory=93
+ORD102: INCONSISTENT, issues=dispatched quantity exceeds ordered quantity, inventory unchanged at 93
+ORD103: OK, outstanding=3, inventory=91
+
+Final inventory: 91
 ```
 
 ## Mermaid flowchart code
 
+The flowchart above is Mermaid code. You can copy this version into a Mermaid-compatible editor:
+
 ```mermaid
 flowchart TD
-    Start([Start])
-    Inputs[/Input venue and equipment costs<br/>Input per-participant costs<br/>Input sponsorship, contribution, and registrations/]
-    Fixed[Calculate fixed costs<br/>venue + equipment]
-    Variable[Calculate variable cost per participant<br/>catering + transport + certificates]
-    Total[Calculate total costs and participant contributions]
-    Shortfall[Calculate funding shortfall<br/>max(0, total costs - sponsorship - contributions)]
-    Check{Is contribution per participant<br/>greater than variable cost per participant?}
-    BreakEven[Calculate break-even registrations<br/>ceil(max(0, fixed costs - sponsorship)<br/>/ net per participant)]
-    Impossible[Report break-even cannot be reached<br/>through registrations alone]
-    Output[/Display costs, contributions,<br/>shortfall, and break-even count/]
-    End([End])
-
-    Start --> Inputs --> Fixed --> Variable --> Total --> Shortfall --> Check
-    Check -- Yes --> BreakEven --> Output --> End
-    Check -- No --> Impossible --> Output
+    A([Start]) --> B[Read starting inventory and order records]
+    B --> C{More records?}
+    C -- No --> H[Display final inventory]
+    H --> I([End])
+    C -- Yes --> D[Read ordered, dispatched, and returned quantities]
+    D --> E{Quantities valid?}
+    E -- No --> F[Flag inconsistent record; do not update inventory]
+    E -- Yes --> G[Calculate outstanding and update inventory]
+    F --> C
+    G --> C
 ```
